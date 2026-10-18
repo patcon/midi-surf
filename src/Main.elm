@@ -2529,7 +2529,7 @@ infoPanel =
             , Border.width 4
             ]
             [ column
-                [ spacing 20, height fill, scrollbarY, Font.size 16 ]
+                [ spacing 20, height fill, Font.size 16 ]
                 [ column
                     [ centerX
                     , paddingXY 8 18
