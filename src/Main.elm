@@ -2422,7 +2422,11 @@ renderPopup :
     -> Element Msg
 renderPopup screen midiStatus savedPages savedModules popup =
     el
-        ([ padding 5, scrollbars, Background.color (rgba 0.5 0.5 0.5 0.8) ]
+        ([ padding 5
+         , scrollbars
+         , Background.color (rgba 0.5 0.5 0.5 0.8)
+         , htmlAttribute <| HAtt.id "popup"
+         ]
             ++ (case screen of
                     Just s ->
                         [ width <| px s.width
