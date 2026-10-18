@@ -24,14 +24,3 @@ img {
   margin: 20px 0;
   max-width: 200px;
 }
-
-/*
-  elm-ui's `inFront` wrapper sets `pointer-events: none` (re-enabling it on its
-  children). On iOS WebKit, a scrollable element inside such a wrapper often
-  ignores the first touch-scroll gesture, so the popup needed two swipes to
-  scroll. The popup covers the whole screen anyway, so let its wrapper take
-  pointer events.
-*/
-:has(> #popup) {
-  pointer-events: auto;
-}
