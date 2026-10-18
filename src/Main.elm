@@ -1810,20 +1810,10 @@ update msg model =
                                 }
                             )
 
-                -- A touch event can carry several changed touches, so each one is
-                -- applied in turn. `faderChanging` ignores touches whose identifier
-                -- doesn't match the touch that grabbed the fader.
                 ( newFader, midiMsgs ) =
-                    List.foldl
-                        (\touch ( currentFader, msgsSoFar ) ->
-                            let
-                                ( updatedFader, touchMidiMsgs ) =
-                                    C.faderChanging touch.identifier touch.clientPos currentFader
-                            in
-                            ( updatedFader, msgsSoFar ++ touchMidiMsgs )
-                        )
-                        ( fader, [] )
-                        touchEvent.changedTouches
+                    touchEvent.changedTouches
+                        |> List.map (\touch -> ( touch.identifier, touch.clientPos ))
+                        |> C.faderChangingTouches fader
             in
             ( { model
                 | pages =

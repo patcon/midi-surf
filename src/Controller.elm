@@ -521,6 +521,23 @@ faderChanging identifier ( newX, newY ) controller =
             ( controller, [] )
 
 
+faderChangingTouches : Controller -> List ( Int, ( Float, Float ) ) -> ( Controller, List Midi.MidiMsg )
+faderChangingTouches controller touches =
+    -- A touch event can carry several changed touches, so each one is applied
+    -- in turn. `faderChanging` ignores touches whose identifier doesn't match
+    -- the touch that grabbed the fader.
+    List.foldl
+        (\( identifier, coordinates ) ( currentController, msgsSoFar ) ->
+            let
+                ( updatedController, touchMsgs ) =
+                    faderChanging identifier coordinates currentController
+            in
+            ( updatedController, msgsSoFar ++ touchMsgs )
+        )
+        ( controller, [] )
+        touches
+
+
 faderSet : Controller -> ( Controller, List MidiMsg )
 faderSet controller =
     case controller of
