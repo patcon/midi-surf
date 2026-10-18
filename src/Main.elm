@@ -62,6 +62,18 @@ date =
     "2024-02-13"
 
 
+{-| Where this build of the app is hosted, used for share links.
+-}
+appOrigin : String
+appOrigin =
+    "https://patcon.github.io"
+
+
+appPath : List String
+appPath =
+    [ "midi-surf", "" ]
+
+
 
 -- {{{ MODEL
 
@@ -224,7 +236,9 @@ init { mInitialState } url navKey =
         mPageString =
             Maybe.map
                 identity
-                (UParser.parse (UParser.query <| QParser.string "page") url)
+                -- The path is ignored so presets also load when the app is served
+                -- from a sub-path, e.g. GitHub Pages.
+                (UParser.parse (UParser.query <| QParser.string "page") { url | path = "/" })
     in
     case Codec.decodeValue (Codec.maybe modelCodec) mInitialState of
         Ok (Just model) ->
@@ -1395,8 +1409,8 @@ update msg model =
                         Navigation.pushUrl
                             key
                             (Builder.crossOrigin
-                                "https://midisurf.app"
-                                []
+                                appOrigin
+                                appPath
                                 []
                             )
 
@@ -2286,7 +2300,7 @@ defaultButtons =
             , Border.width 4
             , backgroundColour White
             ]
-            { url = "https://github.com/mochreach/midi-surf/blob/main/presets.md"
+            { url = "https://github.com/patcon/midi-surf/blob/main-patcon/presets.md"
             , label =
                 Icons.package
                     |> Icons.withSize 28
@@ -2541,7 +2555,7 @@ infoPanel =
                         (" (" ++ date ++ ", ")
                     , newTabLink
                         linkStyle
-                        { url = "https://github.com/mochreach/midi-surf"
+                        { url = "https://github.com/patcon/midi-surf"
                         , label = text "source"
                         }
                     , text ")"
@@ -2872,8 +2886,8 @@ shareMenu mPage =
 
                         pageUrl =
                             Builder.crossOrigin
-                                "https://midisurf.app"
-                                []
+                                appOrigin
+                                appPath
                                 [ Builder.string "page" compressedPage ]
                     in
                     row

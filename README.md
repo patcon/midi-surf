@@ -1,5 +1,16 @@
 # MIDI Surf
 
+> [!NOTE]
+> **About this fork:** This is [@patcon](https://github.com/patcon)'s fork of
+> [mochreach/midi-surf](https://github.com/mochreach/midi-surf). It adds
+> improved multi-touch support (playing several buttons and faders at once
+> — see [upstream #29](https://github.com/mochreach/midi-surf/issues/29)) and
+> is auto-deployed from the `main-patcon` branch to
+> **https://patcon.github.io/midi-surf/**. The original app lives at
+> [midisurf.app](https://midisurf.app). Changes intended for upstream are
+> developed on feature branches (e.g. `multitouch`) and merged into
+> `main-patcon`.
+
 **A flexible and powerful MIDI controller anywhere you have a browser!**
 
 ![sketch1673045999388](https://user-images.githubusercontent.com/8362681/222118318-b104ae65-c6a9-4f98-ac1b-a7cd02effb51.png)
@@ -49,7 +60,7 @@ current browser compatibility.
 
 ## Presets
 
-Here is a list of presets you can import: https://github.com/mochreach/midi-surf/blob/main/presets.md
+Here is a list of presets you can import: https://github.com/patcon/midi-surf/blob/main-patcon/presets.md
 
 ## Update History
 
