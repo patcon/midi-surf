@@ -1794,16 +1794,6 @@ update msg model =
 
         FaderChanging id touchEvent ->
             let
-                touchCoordinates =
-                    List.head touchEvent.changedTouches
-                        |> Maybe.map .clientPos
-                        |> Maybe.withDefault ( 0, 0 )
-
-                identifier =
-                    List.head touchEvent.changedTouches
-                        |> Maybe.map .identifier
-                        |> Maybe.withDefault -1
-
                 fader =
                     getControllerFromActivePage id model.activePage model.pages
                         |> Maybe.withDefault
@@ -1821,7 +1811,9 @@ update msg model =
                             )
 
                 ( newFader, midiMsgs ) =
-                    C.faderChanging identifier touchCoordinates fader
+                    touchEvent.changedTouches
+                        |> List.map (\touch -> ( touch.identifier, touch.clientPos ))
+                        |> C.faderChangingTouches fader
             in
             ( { model
                 | pages =
