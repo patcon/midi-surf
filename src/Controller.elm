@@ -9,6 +9,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy as Lazy
 import FeatherIcons as Icons
+import Html.Attributes as HAtt
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Touch as Touch
 import Midi exposing (Channel(..), MidiMsg(..))
@@ -1699,6 +1700,12 @@ renderNote msgs config editing state =
                         msgs.buttonUpMsg
                     )
              , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.buttonUpMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
+             , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
                         msgs.buttonUpMsg
@@ -1775,6 +1782,12 @@ renderChord msgs config editing state =
                         msgs.buttonUpMsg
                     )
              , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.buttonUpMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
+             , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
                         msgs.buttonUpMsg
@@ -1844,6 +1857,12 @@ renderCCValue msgs config editing state =
                     (\_ ->
                         msgs.buttonUpMsg
                     )
+             , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.buttonUpMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
              , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
@@ -1926,6 +1945,12 @@ renderCommand msgs config editing state =
                         msgs.buttonUpMsg
                     )
              , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.buttonUpMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
+             , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
                         msgs.buttonUpMsg
@@ -1995,6 +2020,12 @@ renderSequence msgs config editing state =
                     (\_ ->
                         msgs.buttonUpMsg
                     )
+             , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.buttonUpMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
              , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
@@ -2072,6 +2103,12 @@ renderFader msgs config editing state =
                     (\_ ->
                         msgs.faderSetMsg
                     )
+             , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.faderSetMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
              , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
@@ -2180,6 +2217,12 @@ renderXYFader msgs config editing state =
                     (\_ ->
                         msgs.faderSetMsg
                     )
+             , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.faderSetMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
              , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->
@@ -2315,6 +2358,12 @@ renderPitchBend msgs config editing state =
                     (\_ ->
                         msgs.faderSetMsg
                     )
+             , htmlAttribute <|
+                Touch.onCancel
+                    (\_ ->
+                        msgs.faderSetMsg
+                    )
+             , htmlAttribute <| HAtt.style "touch-action" "none"
              , htmlAttribute <|
                 Mouse.onUp
                     (\_ ->

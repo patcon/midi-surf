@@ -1794,16 +1794,6 @@ update msg model =
 
         FaderChanging id touchEvent ->
             let
-                touchCoordinates =
-                    List.head touchEvent.changedTouches
-                        |> Maybe.map .clientPos
-                        |> Maybe.withDefault ( 0, 0 )
-
-                identifier =
-                    List.head touchEvent.changedTouches
-                        |> Maybe.map .identifier
-                        |> Maybe.withDefault -1
-
                 fader =
                     getControllerFromActivePage id model.activePage model.pages
                         |> Maybe.withDefault
@@ -1820,8 +1810,20 @@ update msg model =
                                 }
                             )
 
+                -- A touch event can carry several changed touches, so each one is
+                -- applied in turn. `faderChanging` ignores touches whose identifier
+                -- doesn't match the touch that grabbed the fader.
                 ( newFader, midiMsgs ) =
-                    C.faderChanging identifier touchCoordinates fader
+                    List.foldl
+                        (\touch ( currentFader, msgsSoFar ) ->
+                            let
+                                ( updatedFader, touchMidiMsgs ) =
+                                    C.faderChanging touch.identifier touch.clientPos currentFader
+                            in
+                            ( updatedFader, msgsSoFar ++ touchMidiMsgs )
+                        )
+                        ( fader, [] )
+                        touchEvent.changedTouches
             in
             ( { model
                 | pages =
