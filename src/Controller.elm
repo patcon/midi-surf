@@ -344,6 +344,35 @@ type FaderStatus
     | Changing Int ( Float, Float )
 
 
+faderMidiMsg : FaderState -> Int -> Midi.MidiMsg
+faderMidiMsg state percent =
+    let
+        protectedMax =
+            -- This is here to unsure that the first presets that I
+            -- made still work. I stupidly set their max value to 0.
+            if state.valueMax == 0 then
+                127
+
+            else
+                state.valueMax
+
+        rangeValue =
+            (protectedMax - state.valueMin)
+                |> toFloat
+
+        value =
+            ((rangeValue / 100) * toFloat percent)
+                |> round
+                |> (+) state.valueMin
+                |> clamp 0 127
+    in
+    Midi.ControllerChange
+        { channel = Midi.channelToMidiNumber state.channel
+        , controller = state.ccNumber
+        , value = value
+        }
+
+
 faderChanging : Int -> ( Float, Float ) -> Controller -> ( Controller, List Midi.MidiMsg )
 faderChanging identifier ( newX, newY ) controller =
     case controller of
@@ -359,44 +388,24 @@ faderChanging identifier ( newX, newY ) controller =
                                 state.valuePercent
                                     + valueChange
                                     |> clamp 0 100
-
-                            protectedMax =
-                                -- This is here to unsure that the first presets that I
-                                -- made still work. I stupidly set their max value to 0.
-                                if state.valueMax == 0 then
-                                    127
-
-                                else
-                                    state.valueMax
-
-                            rangeValue =
-                                (protectedMax - state.valueMin)
-                                    |> toFloat
-
-                            value =
-                                ((rangeValue / 100) * toFloat newPercent)
-                                    |> round
-                                    |> (+) state.valueMin
-                                    |> clamp 0 127
                         in
                         ( Fader
                             { state
                                 | status = Changing oldIdentifier ( newX, newY )
                                 , valuePercent = newPercent
                             }
-                        , [ Midi.ControllerChange
-                                { channel = Midi.channelToMidiNumber state.channel
-                                , controller = state.ccNumber
-                                , value = value
-                                }
-                          ]
+                        , [ faderMidiMsg state newPercent ]
                         )
 
                     else
                         ( Fader state, [] )
 
                 Set ->
-                    ( Fader { state | status = Changing identifier ( newX, newY ) }, [] )
+                    -- Resend the current value on touch, so that tapping a fader
+                    -- without moving it still syncs the receiving device.
+                    ( Fader { state | status = Changing identifier ( newX, newY ) }
+                    , [ faderMidiMsg state state.valuePercent ]
+                    )
 
         XYFader state ->
             case state.status of
