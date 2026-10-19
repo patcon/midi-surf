@@ -344,7 +344,10 @@ type FaderStatus
     | Changing Int ( Float, Float )
 
 
-faderMidiMsg : FaderState -> Int -> Midi.MidiMsg
+faderMidiMsg :
+    { a | channel : Channel, ccNumber : Int, valueMin : Int, valueMax : Int }
+    -> Int
+    -> Midi.MidiMsg
 faderMidiMsg state percent =
     let
         protectedMax =
@@ -371,6 +374,25 @@ faderMidiMsg state percent =
         , controller = state.ccNumber
         , value = value
         }
+
+
+xyFaderMidiMsgs : XYFaderState -> Int -> Int -> List Midi.MidiMsg
+xyFaderMidiMsgs state percent1 percent2 =
+    [ faderMidiMsg
+        { channel = state.channel1
+        , ccNumber = state.ccNumber1
+        , valueMin = state.valueMin1
+        , valueMax = state.valueMax1
+        }
+        percent1
+    , faderMidiMsg
+        { channel = state.channel2
+        , ccNumber = state.ccNumber2
+        , valueMin = state.valueMin2
+        , valueMax = state.valueMax2
+        }
+        percent2
+    ]
 
 
 faderChanging : Int -> ( Float, Float ) -> Controller -> ( Controller, List Midi.MidiMsg )
@@ -420,25 +442,6 @@ faderChanging identifier ( newX, newY ) controller =
                                     + valueChange1
                                     |> clamp 0 100
 
-                            protectedMax1 =
-                                -- This is here to unsure that the first presets that I
-                                -- made still work. I stupidly set their max value to 0.
-                                if state.valueMax1 == 0 then
-                                    127
-
-                                else
-                                    state.valueMax1
-
-                            rangeValue1 =
-                                (protectedMax1 - state.valueMin1)
-                                    |> toFloat
-
-                            value1 =
-                                ((rangeValue1 / 100) * toFloat newPercent1)
-                                    |> round
-                                    |> (+) state.valueMin1
-                                    |> clamp 0 127
-
                             valueChange2 =
                                 oldY - newY |> round
 
@@ -446,25 +449,6 @@ faderChanging identifier ( newX, newY ) controller =
                                 state.valuePercent2
                                     + valueChange2
                                     |> clamp 0 100
-
-                            protectedMax2 =
-                                -- This is here to unsure that the first presets that I
-                                -- made still work. I stupidly set their max value to 0.
-                                if state.valueMax2 == 0 then
-                                    127
-
-                                else
-                                    state.valueMax2
-
-                            rangeValue2 =
-                                (protectedMax2 - state.valueMin2)
-                                    |> toFloat
-
-                            value2 =
-                                ((rangeValue2 / 100) * toFloat newPercent2)
-                                    |> round
-                                    |> (+) state.valueMin2
-                                    |> clamp 0 127
                         in
                         ( XYFader
                             { state
@@ -472,24 +456,17 @@ faderChanging identifier ( newX, newY ) controller =
                                 , valuePercent1 = newPercent1
                                 , valuePercent2 = newPercent2
                             }
-                        , [ Midi.ControllerChange
-                                { channel = Midi.channelToMidiNumber state.channel1
-                                , controller = state.ccNumber1
-                                , value = value1
-                                }
-                          , Midi.ControllerChange
-                                { channel = Midi.channelToMidiNumber state.channel2
-                                , controller = state.ccNumber2
-                                , value = value2
-                                }
-                          ]
+                        , xyFaderMidiMsgs state newPercent1 newPercent2
                         )
 
                     else
                         ( XYFader state, [] )
 
                 Set ->
-                    ( XYFader { state | status = Changing identifier ( newX, newY ) }, [] )
+                    -- Resend the current values on touch, as for `Fader`.
+                    ( XYFader { state | status = Changing identifier ( newX, newY ) }
+                    , xyFaderMidiMsgs state state.valuePercent1 state.valuePercent2
+                    )
 
         PitchBend state ->
             case state.status of
@@ -523,7 +500,19 @@ faderChanging identifier ( newX, newY ) controller =
                         ( PitchBend state, [] )
 
                 Set ->
-                    ( PitchBend { state | status = Changing identifier ( newX, newY ) }, [] )
+                    -- Resend the current bend on touch, as for `Fader`.
+                    let
+                        { lsb, msb } =
+                            Midi.intToMsbLsb state.bendValue
+                    in
+                    ( PitchBend { state | status = Changing identifier ( newX, newY ) }
+                    , [ Midi.PitchBend
+                            { channel = Midi.channelToMidiNumber state.channel
+                            , bendLSB = lsb
+                            , bendMSB = msb
+                            }
+                      ]
+                    )
 
         _ ->
             ( controller, [] )
