@@ -29,7 +29,10 @@ all =
             \_ ->
                 C.faderChangingTouches (fader C.Set 50)
                     [ ( 1, ( 0, 100 ) ), ( 2, ( 0, 300 ) ) ]
-                    |> Expect.equal ( fader (C.Changing 1 ( 0, 100 )) 50, [] )
+                    |> Expect.equal
+                        ( fader (C.Changing 1 ( 0, 100 )) 50
+                        , [ Midi.ControllerChange { channel = 0, controller = 7, value = 50 } ]
+                        )
         , test "A grabbed fader follows its own touch when it isn't the first changed touch" <|
             \_ ->
                 C.faderChangingTouches (fader (C.Changing 2 ( 0, 100 )) 50)
